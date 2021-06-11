@@ -8,7 +8,6 @@ For the first week of coding I am working on saving the evaluated block paramete
 
 The resulting piece of code is very simple so far, currently the [block's export_data method](https://github.com/oscekh/gnuradio/blob/feature/grc-view-only-mode/grc/core/blocks/block.py#L634) is modified to fetch the parameter objects' evaluated values and pass them along in the exported data dictionary. See:
 
-<code>
 ```Python
     def export_data(self):
         """
@@ -50,7 +49,9 @@ def audit(event, args):
         log.debug("evaluating", args)
 ```
 
+
 For the next few weeks the work will be more intricate and I will have more interesting technical details to share in my updates here. Feel free to reach out if you have any questions or feedback!
+
 \- Oscar
 
 
