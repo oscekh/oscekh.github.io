@@ -1,3 +1,107 @@
+## Week 3 - Block and FlowGraph level eval 
+
+Last week I disabled parameter level evaluation for untrusted flowgraphs, using the evaluated values I've stored in the .grc-files instead. This week I've extended this further by also disabling evaluation on block level as well as flowgraph level.
+
+For the block level evaluation there are two parts, expressions in the block templates as well as import-blocks. The GRC core uses `exec` to run the imports which updates the namespace. Though, this could be exploited to have the GRC run some malicious code and thus need to be disabled for the View-Only Mode. Similarly the templates contain expressions that also could contain malicious code.
+See line **25** in the following template (`grc/blocks/pad_source.block.yml`) for an example of a (benign) expression:
+
+```
+ 1 id: pad_source
+ 2 label: Pad Source
+ 3 flags: [ python, cpp ]
+ 4
+ 5 parameters:
+ 6 -   id: label
+ 7     label: Label
+20     ...
+21 -   id: vlen
+22     label: Vector Length
+23     dtype: int
+24     default: '1'
+25     hide: ${ 'part' if vlen == 1 else 'none' }
+26 -   id: num_streams
+27     ...
+```
+
+These expressions are evaluated using the block's `evaluate` method which before my changes just called the parent flowgraph's evaluate with the block's namespace. I've changed the method to, in a trusted flowgraph, save all expression-evaluation pairs in a dictionary `_eval_cache` which is then used when exporting the block data. For an untrusted flowgraph the block fetches the evaluated expressions from the file with the `import_data` method and `evaluate` then simply returns the stored value.
+
+```Python
+def evaluate(self, expr):
+    if self.parent_flowgraph.is_trusted:
+        self._eval_cache[expr] = self.parent_flowgraph.evaluate(expr, self.namespace)
+
+    evaluated = self._eval_cache.get(expr)
+
+    if evaluated is None:
+        # error
+
+    return evaluated
+
+def export_data(self):
+    """
+    Export this block's params to nested data.
+
+    Returns:
+        a nested data odict
+    """
+    data = collections.OrderedDict()
+
+    # ...
+
+    data['expressions'] = collections.OrderedDict(sorted(
+        (expr, val) for expr, val in self._eval_cache.items()
+    ))
+
+    return data
+```
+
+As for the import blocks the `exec` is only executed if the flowgraph isn't trusted, otherwise it is ignored. For the imports this is sufficient as the View-Only Mode removes the other evaling where the updated namespace provided by the import would have been needed.
+
+```Python
+def rewrite(self):
+    # ...
+    
+    if self.parent_flowgraph.is_trusted:
+        exec(imports, self.block_namespace)
+
+    # ...
+```
+
+Similarly the FlowGraph's rewrite method (`grc/core/FlowGraph.py`) is altered to not perform `renew_namespace` unless trusted. This stops the execs and evals done on the flowgraph level (such as imports):
+
+```Python
+def rewrite(self):
+    """
+    Flag the namespace to be renewed.
+    """
+    if self.is_trusted:
+        self.renew_namespace()
+    Element.rewrite(self)
+
+def renew_namespace(self):
+    namespace = {}
+    # Load imports
+    for expr in self.imports():
+        try:
+            exec(expr, namespace)
+        except ImportError:
+            # We do not have a good way right now to determine if an import is for a
+            # hier block, these imports will fail as they are not in the search path
+            # this is ok behavior, unfortunately we could be hiding other import bugs
+            pass
+        except Exception:
+            log.exception('Failed to evaluate import expression "{0}"'.format(expr), exc_info=True)
+            pass
+
+    self.imported_names = list(namespace.keys())
+
+    # ...
+```
+
+The next week's work will focus on refining this further, adding a trigger for when the trust-level should change from untrusted to trusted (later in form of a GUI prompt), as well as writing a test using the Python audit features to make sure evals/execs are disabled as they should.
+
+\- Oscar
+
 ## Week 2 - Using the saved values instead of evaluating
 This week I have improved the exporting of evaluated values that I implemented last week as well as started working on actually using these values when loading the grc-file.
 
