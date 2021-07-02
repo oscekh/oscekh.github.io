@@ -1,3 +1,63 @@
+## Week 4 - Testing with Python's audit-feature and PR
+This week's focus has been on refining the core-parts of the View-Only Mode for the upcoming PR (more on that below) as well as adding a test that checks there are no evals/execs being run in untrusted flowgraphs.
+
+### Test
+I've previously written about the [Python 3.8 Audit feature](https://www.python.org/dev/peps/pep-0578/) which allows the developer to add a hook that will be called whenever an event is audited. One such event is the `exec` event which includes the `eval` and `exec` functions. This allows us to check for any evals in runtime, which we can use to make sure the View-Only mode is working.
+
+```Python
+def audit(event, args):
+    if event == 'exec':
+        print("There is eval!")
+
+sys.addaudithook(audit)
+```
+
+Though, this provides many false-positives due to legitimate evals outside of the grc, such as in libraries. Therefore there must also be some filtering of the events, such as filtering out anything that isn't in the grc. While the actual code object executed is accessible through the `args` parameter it does not provide us the filename from which it was called (it provides file: "<string>"). Therefore we can use the `inspect` module part of the standard library to inspect the stack and thus determine where the event comes from.
+
+The resulting test case looks something like this:
+
+```Python
+import inspect
+# ...
+
+EVALUATED = False
+EVALUATED_PATH = None
+
+def audit(event, args):
+    global EVALUATED, EVALUATED_PATH
+
+    if event == 'exec':
+        stack = inspect.stack()
+        path = stack[1].filename
+
+        if "/grc/core" in path:
+            EVALUATED = True
+            EVALUATED_PATH = path
+
+def open_flowgraph(path):
+    # ...
+
+@pytest.mark.skipif(sys.version_info < (3,8), reason="requires python 3.8")
+def test_eval():
+    global EVALUATED, EVALUATED_PATH
+
+    sys.addaudithook(audit)
+
+    flowgraph_path = path.join(path.dirname(__file__), 'resources', 'test_eval.grc')
+    open_flowgraph(flowgraph_path)
+
+    assert not EVALUATED, f"untrusted evaluation in {EVALUATED_PATH}"
+```
+
+### PR
+The plan is to divide the work into two pull requests. The first one will contain the backend logic of the View-Only Mode (mainly in `grc/core`) whereas the second contains the GUI/UX parts. I will make the first PR this weekend and begin working on the second stage of the project next week. This means working on features such as:
+- Checkbox setting for activating View-Only Mode
+- Prompt for enabling trust in a FlowGraph
+- More advanced trust settings, handling persistent trust
+- If time: Overview of expressions to be executed if trusted
+
+\- Oscar
+
 ## Week 3 - Block and FlowGraph level eval 
 
 Last week I disabled parameter level evaluation for untrusted flowgraphs, using the evaluated values I've stored in the .grc-files instead. This week I've extended this further by also disabling evaluation on block level as well as flowgraph level.
