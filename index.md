@@ -17,7 +17,35 @@ Whenever the user wants to perform some action outside of the View-Only Mode, i.
 Some users may not want to use the View-Only Mode at all, therefore I have added a toggle button for enabling/disabling it. This is also pretty straightforward. The toggle button controls a property `view_only_mode` in the Platform class (`grc/core/Platform.py`), if it's False any flowgraphs created will be regarded as trusted, meaning they are unaffected by the View-Only Mode.
 Alongside this setting there will be some more settings for trust, allowing the user to edit the trust-list (containing which flowgraphs are permanently trusted).
 
+```Python
+def _handle_action(self, action, *args):
+    log.debug("_handle_action({0}, {1})".format(action, args))
+    main = self.main_window
+
+    # ...
+
+    ##################################################
+    # Initialize/Quit
+    ##################################################
+    if action == Actions.APPLICATION_INITIALIZE:
+        log.debug("APPLICATION_INITIALIZE")
+
+        # View Only Mode
+        act = Actions.TOGGLE_VIEW_ONLY_MODE
+        act.set_enabled(True)
+        if hasattr(act, 'load_from_preferences'):
+            act.load_from_preferences()
+
+        if not act.get_active():
+            self.platform.view_only_mode = False
+
+    # ...
+
+```
+
 ![toggle](images/5/toggle.png)
+
+That's it for this week's update! Next week I will continue with the GUI, connecting the trust prompt to the TrustError and extending the trust system with more GUI.
 
 \- Oscar
 
