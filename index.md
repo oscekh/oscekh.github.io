@@ -1,3 +1,26 @@
+## Week 5 - Getting started with the GUI
+As I mentioned last week the project is split into two parts: the core and the GUI. I made the PR for the core part this monday and have gotten some good feedback on it. I will adjust the code according to the feedback and push the changes this weekend, constituting the half time of GSoC. Naturally, there may be additional changes to the core later on if needed.
+
+Link to PR:
+<https://github.com/gnuradio/gnuradio/pull/4838>
+
+This week I have added GUI elements for exiting the View-Only Mode. This includes a prompt which trusts the specific flowgraph and a toggle which enables/disables the View-Only Mode on a general non-flowgraph-specific level.
+
+### Prompt
+Whenever the user wants to perform some action outside of the View-Only Mode, i.e. anything that needs more than the cached values, the user will be prompted the trust the flowgraph. If the user trusts the flowgraph the View-Only Mode is disabled for that flowgraph and thus evaluation is allowed. I've made a new dialog in `grc/gui/Dialogs.py` which currently provides the options **Trust** and
+**Cancel**, if the user chooses **Trust** the flowgraph is marked as trusted. Currently this is triggered in the flowgraph's `update` method, which is typically called by the action-handler `_handle_action` in `grc/gui/Application.py`. This generates many false positives, where the user is prompted for actions that don't actually require leaving the View-Only Mode. The plan is to throw a
+`TrustError` in the core whenever trust is needed, e.g. due to missing cache-values, and on such error open this dialog. This also requires saving the state temporarily as this exception could be raised in the middle of an action, interrupting the "expected" control flow.
+
+![prompt](images/5/prompt.png)
+
+### Toggle
+Some users may not want to use the View-Only Mode at all, therefore I have added a toggle button for enabling/disabling it. This is also pretty straightforward. The toggle button controls a property `view_only_mode` in the Platform class (`grc/core/Platform.py`), if it's False any flowgraphs created will be regarded as trusted, meaning they are unaffected by the View-Only Mode.
+Alongside this setting there will be some more settings for trust, allowing the user to edit the trust-list (containing which flowgraphs are permanently trusted).
+
+![toggle](images/5/toggle.png)
+
+\- Oscar
+
 ## Week 4 - Testing with Python's audit-feature and PR
 This week's focus has been on refining the core-parts of the View-Only Mode for the upcoming PR (more on that below) as well as adding a test that checks there are no evals/execs being run in untrusted flowgraphs.
 
