@@ -1,3 +1,51 @@
+## Week 6 - Managing trusted flow graphs
+Until this week a flowgraph's trust was non-persistent, whenever the user restarted the GRC they would have to trust it again. This would get quite annoying in the long run which is why I've now added the option to trust a flowgraph indefinitely. The GRC then saves the flowgraph path to the config-file, similar to how it already keeps track of open files/recent files. 
+
+**`~/.gnuradio/grc.conf`**
+```
+# This contains only GUI settings for GRC and is not meant for users to edit.
+#
+# GRC settings not accessible through the GUI are in config.conf under
+# section [grc].
+
+[main]
+snap_to_grid = True
+file_open = /home/oscar/documents/gsoc/junk/test.grc
+main_window_width = 1366
+main_window_height = 730
+console_window_position = 513
+blocks_window_position = 1136
+variable_editor_position = 332
+xterm_missing =
+view_only_mode = True
+
+[files_recent]
+
+[files_open]
+files_open_0 = /home/oscar/documents/gsoc/junk/test.grc
+
+[files_trusted]
+files_trusted_0 = /home/oscar/documents/gsoc/junk/test.grc
+```
+
+For the GUI this feature includes a "Trust forever" button, which internally adds the flowgraph path to the config.
+
+![prompt](images/6/prompt.png)
+
+There is also a new dialog where the user can see which flowgraphs are trusted and remove trust from flowgraphs. This "trust manager" may be extended with additional features if there is time. For example one may want to trust an entire directory instead of having to trust each individual flowgraph in that directory.
+
+![prompt](images/6/manager.png)
+
+This dialog is reachable via File\>Manage Trust:
+
+![prompt](images/6/bar.png)
+
+In addition to the persistent trust I've also worked on how the trust prompt is triggered. Last week I wrote about how triggering it on flowgraph update is too "coarse-grained", as the user is prompted for actions that should not require leaving the view-only mode. Therefore I've tried to trigger it on the core's TrustError instead, though this turned out to be more difficult than I had expected. Specifically I will have to invalidate the cached values of block/parameter expressions on some actions, causing it to throw a TrustError which then triggers the prompt. I'll continue working on this for the next week. I think this is the main hurdle left for a basic view-only mode, then the work will be on refining the UX as well as adding more features which would be nice to have, such as using content hashes to check if a trusted file has been changed since it's last use.
+
+Have a nice weekend everyone!
+
+\- Oscar
+
 ## Week 5 - Getting started with the GUI
 As I mentioned last week the project is split into two parts: the core and the GUI. I made the PR for the core part this monday and have gotten some good feedback on it. I will adjust the code according to the feedback and push the changes this weekend, constituting the half time of GSoC. Naturally, there may be additional changes to the core later on if needed.
 
