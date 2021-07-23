@@ -1,3 +1,66 @@
+## Week 7 - Continuing on last week's work 
+
+### Add "Add trusted"-button in trust manager
+Last week I created a window where the user can manage trusted flow graphs. It had a list of the flow graphs and a button to stop trusting them. This week I have added a button to add trusted flow graphs, which should be a convenient alternative to having to open each flowgraph individually and trigger the prompt to trust it. This supports adding multiple files at once, but not trusting entire
+directories. Next week I will try to add directory trusting as well, so the user could trust all files in a directory instead of having to specify the exact files.
+
+![add files](images/7/add_files.png)
+
+### Refining the prompt behavior
+The main thing I've been working on this week is refining how and when the prompt is activated. As mentioned last week I initially activated it on flow graph update, which caused it to pop up way too often. Then I set out to activate it on TrustErrors raised from the `core` which wasn't that simple. This week I managed to get that working as well but it was cumbersome and messy.
+
+So, after some consulting with my mentor Sebastian (Koslowski) we decided on a different approach where the Application's `handle_action`-method uses a whitelist of view-only actions. At the start of `handle_action` it checks the action against the whitelist. If it isn't a view-only action the prompt is opened, and the user can choose to trust/not trust the flow graph. If the user does **not** trust the
+flow graph it is reverted to it's initial state, effectively reverting the action. 
+
+**`grc/Application.py:handle_action`**
+```Python
+def _handle_action(self, action, *args):
+    # ...
+
+    non_view_only_actions = {
+        Actions.FLOW_GRAPH_SAVE,
+        Actions.FLOW_GRAPH_SAVE_AS,
+        Actions.FLOW_GRAPH_SAVE_COPY,
+        Actions.ELEMENT_CREATE,
+        Actions.ELEMENT_DELETE,
+        Actions.BLOCK_ENABLE,
+        Actions.BLOCK_DISABLE,
+        Actions.BLOCK_CREATE_HIER,
+        Actions.BLOCK_PASTE,
+        Actions.FLOW_GRAPH_GEN,
+        Actions.FLOW_GRAPH_EXEC,
+        Actions.FLOW_GRAPH_KILL
+    }
+
+    if (flow_graph and
+            flow_graph.view_only and
+            action in non_view_only_actions):
+
+        # open prompt
+        flow_graph.view_only = Dialogs.choose_trust(main, self.config, flow_graph.grc_file_path)
+
+        # reset to initial state if not trusted
+        if flow_graph.view_only:
+            data = flow_graph.initial_state
+            if data is not None:
+                flow_graph.import_data(data)
+                flow_graph.update()
+            return
+
+        flow_graph.update()
+
+    if action == Actions.APPLICATION_INITIALIZE:
+    # ...
+```
+
+This works really well as the prompt appears only when it should, and the code behind it is pretty clean. It also makes it easy to adjust which actions should be regarded as view-only or not, as it is only a matter of changing the whitelist. There is one action which needs different treatment though,
+`BLOCK_PARAM_MODIFY`. When the user modifies a block's parameter it, unlike other actions, rewrites/updates that block by itself first, before reaching the `handle_action` method. Thus it does not open the prompt when the user changes a parameter, to do that the prompt has to be opened upon focusing on the parameter-input or on keypress. That should be simple to add (famous last words!) and
+will be one of the tasks for next week.
+
+Hope you all have a nice weekend!
+
+\-Oscar
+
 ## Week 6 - Managing trusted flow graphs
 Until this week a flowgraph's trust was non-persistent, whenever the user restarted the GRC they would have to trust it again. This would get quite annoying in the long run which is why I've now added the option to trust a flowgraph indefinitely. The GRC then saves the flowgraph path to the config-file, similar to how it already keeps track of open files/recent files. 
 
