@@ -13,7 +13,7 @@ So, after some consulting with my mentor Sebastian (Koslowski) we decided on a d
 flow graph it is reverted to it's initial state, effectively reverting the action. 
 
 **`grc/Application.py:handle_action`**
-```Python
+{% highlight python %}
 def _handle_action(self, action, *args):
     # ...
 
@@ -51,10 +51,11 @@ def _handle_action(self, action, *args):
 
     if action == Actions.APPLICATION_INITIALIZE:
     # ...
-```
+{% endhighlight %}
 
-This works really well as the prompt appears only when it should, and the code behind it is pretty clean. It also makes it easy to adjust which actions should be regarded as view-only or not, as it is only a matter of changing the whitelist. There is one action which needs different treatment though,
-`BLOCK_PARAM_MODIFY`. When the user modifies a block's parameter it, unlike other actions, rewrites/updates that block by itself first, before reaching the `handle_action` method. Thus it does not open the prompt when the user changes a parameter, to do that the prompt has to be opened upon focusing on the parameter-input or on keypress. That should be simple to add (famous last words!) and
+This works really well as the prompt appears only when it should, and the code behind it is pretty clean. It also makes it easy to adjust which actions should be regarded as view-only or not, as it is only a matter of changing the whitelist. 
+
+There is one action which needs different treatment though: `BLOCK_PARAM_MODIFY`. When the user modifies a block's parameter it, unlike other actions, rewrites/updates that block by itself first, before reaching the `handle_action` method. Thus it does not open the prompt when the user changes a parameter, to do that the prompt has to be opened upon focusing on the parameter-input or on keypress. That should be simple to add (famous last words!) and
 will be one of the tasks for next week.
 
 Hope you all have a nice weekend!
