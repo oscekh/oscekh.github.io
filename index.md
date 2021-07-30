@@ -1,3 +1,29 @@
+## Week 8 - GUI And More
+### Link
+I've added a link in the trust prompt, which in the future will lead to a wiki page about the view-only mode.
+
+![prompt](images/8/prompt.png)
+
+Note: the text in this prompt and any other GUI elements are currently just placeholders. I'll change it, with the input of more UX-savy people, so that everything is clear, grammatically correct etc. And then the wiki page serves as the source of additional info on the feature.
+
+### Trusted directories
+I mentioned the possible feature of trusting entire directories last week, and I've had several people express interest in the feature. So this week I added just that. In the trust manager dialog the user can click "Add directory" and then select the directory (or multiple) in a file chooser dialog. Behind the scenes the directory paths are stored in the config just like trusted grc-files. When a
+flow graph is opened the GRC checks if it is trusted or is inside a trusted directory. If neither -> opened in view only mode.
+
+![trust\_dir](images/8/trust_dir.png)
+
+### Other
+The other stuff I've done this week aren't particularly interesting, but nonetheless important for making the view-only mode robust and smooth. The trust prompt activation is now completely done, it pops up when it should (i.e. for a given set of actions and modifying parameters) and whenever the loaded grc-file is missing some of the values needed for the view only mode. The latter
+scenario could occur if a user opens a file saved before the view-only-mode features had (have?) been added. Currently the user can click cancel in the prompt and view the flow graph in view-only mode even without some stored values, but it will probably display some errors on the blocks as a result of missing evaluated expressions. This behavior is not set in stone yet, as there is a balance between not showing anything at all for
+incomplete grc-files (forces user to trust immediately) or showing them in a possibly error-ridden state (appears wonky in some cases and perfectly fine in others).
+
+For the next week I will look further into the behavior of the view only mode with incomplete grc-files to get insight into what direction we'd want to pursue. I will also create the "Overview of expressions to evaluate"-dialog which I had in my initial proposal. It would be reachable from the trust prompt and provide a list of all expressions that would be evaluated if trusted. The expressions should be
+sorted according to some heuristics trying to determine how "suspicious" they are, helping the user to quickly make an informed decision to trust or not.
+
+
+\- Oscar
+
+
 ## Week 7 - Continuing on last week's work 
 
 ### Add "Add trusted"-button in trust manager
