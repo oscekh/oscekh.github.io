@@ -1,3 +1,29 @@
+## Week 9 - Expression Overview
+Hi and welcome to the penultimate week of GSoC coding! 
+
+This week I'm excited to show the expression overview, which I think complements the rest of the View-Only mode very well. Then I'll briefly describe what's left of this year's GSoC.
+
+### Expression Overview
+I've added an expression overview to the trust prompt. The overview lists all expressions that would be evaluated if the flow graph is trusted. This should make it easier for a user to examine if the flow graph should be trusted or not.The overview is hidden (and unpopulated) in an expander when the prompt is showed. When the user clicks the expander the overview is filled with the data and displayed to the user. 
+
+![prompt\_closed](images/9/prompt_closed.png)
+![prompt\_open](images/9/prompt_open.png)
+
+Along with the expressions the overview shows their scope (flow graph, block, parameter) and any name it's associated with. For example a parameter expression has the scope `PARAMETER` and their name is the block it belongs to, whereas the expressions found in block templates have the scope `BLOCK`
+
+![prompt\_open](images/9/prompt_open_2.png)
+
+I think this is quite useful in it's current state, but there are many improvements that could be implemented. For example there are many expressions in a flow graph which are obviously harmless, such as literals. For example, in the image above there are expressions such as `6` and `True` which just clutters the overview and potentially obscures malicious expressions. Such expressions
+should be filtered out beforehand by doing some parsing. Part of next week's work will be improving this overview further.
+
+Next week is the last week of coding, then there is a week of "code submission" and evaluations followed by a week of the mentors' evaluations. So next week there will be a PR containing the "finished" work, and then there will be updates according to the reviews on the PR by the code submission part. Of course GSoC ending doesn't mean the View Only Mode is completely done, I'm looking
+forward to seeing the response and thoughts of the community once it goes live and developing it further.
+
+Happy friday!
+
+
+\- Oscar
+
 ## Week 8 - GUI And More
 ### Link
 I've added a link in the trust prompt, which in the future will lead to a wiki page about the view-only mode.
