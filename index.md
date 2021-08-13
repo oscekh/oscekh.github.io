@@ -1,3 +1,31 @@
+## Week 10 - Finishing touches
+This is the last week allotted for project work, with the next week being for submission and evaluation. This week has therefore consisted of making the final touches before submitting the PR. The PR will be submitted tomorrow as I want to do a little more work on the expression overview in the trust prompt. After the PR has gotten reviewed and I've adjusted the code accordingly I'll be done
+with GSoC'!
+
+As for this week's work I'll just list some of the things I've been doing:
+
+**[View-Only] showed in tab:** 
+Now the tabs show the prefix `[View-Only]` for untrusted graphs. Before this addition there was no real way of knowing whether you were in view only mode other than triggering the prompt by making some change, e.g. changing a param
+
+**Improved text:**
+For the development I've just had some placeholder text for the buttons/prompt, but now I've replaced that with proper text that hopefully have a good balance of being concise and helpful. There is also the wiki link in the prompt in case the user wants more info. The wiki page itself is currently under construction.
+
+**Improved tests:**
+I made a test that makes sure evals aren't run in view-only mode a while back, using python's audit feature. That only tested the case of a valid grc-file that had all the necessary saved evaluated values. Now I've extended the tests so it has several cases of files missing some values. Such as a file missing evaluated parameters or block-level expressions (originating from the block definition).
+
+**Finished behavior of opening an incomplete FG:**
+In the case of incomplete grc-files, i.e. missing some of the saved values used for view-only, the prompt is now displayed before the flow graph is rendered. When trusting the file everything works as normal, and not trusting the file closes the tab/file. This eliminates the funky middle-ground where parts of the flow-graph may be displayed correctly and other parts completely wrong due to
+missing values.
+
+Here are some images of the GUI:
+
+\- Oscar
+
+![action](images/10/action.png)
+![incomplete](images/10/incomplete.png)
+![incomplete\_expanded](images/10/incomplete2.png)
+![manager](images/10/manager.png)
+
 ## Week 9 - Expression Overview
 Hi and welcome to the penultimate week of GSoC coding! 
 
