@@ -1,4 +1,26 @@
-## Week 10 - Finishing touches
+## Week 11 - Last post
+This is the last blog post for GSoC, this weekend I'm making my submission to GSoC (essentially the PR). [The final PR of the project is up ](https://github.com/gnuradio/gnuradio/pull/5004), so I'd very much appreciate people to check it out and voice their opinions on code/ux/features etc.
+
+This week I've updated the code according to the reviews I've gotten on [my PR](https://github.com/gnuradio/gnuradio/pull/5004). This included a couple of fixes were if the user made changes to settings (enabling/disabling view-only mode, adding/removing trusted fg:s) they were saved to the config, but not applied to the current instance of the GRC. Now they should affect the current instance as well as future ones, as
+intended. 
+
+I've also added a checkbox to the expression overview so the user can choose to filter out the expressions originating from block definitions. I've also made it so identifiers are filtered out (together with literals as implemented last week), which makes for a less cluttered overview.
+
+
+During this week's meeting with my mentors a new issue came up as well which I'm hoping to fix this weekend. If I save a (trusted) flow graph containing errors, such as a faulty parameter value, and then reopen it (not in view-only) I will get the errors since the core parts will identify them when constructing the flow graph. The problem is that if the flow graph was opened in view-only these errors would not show, as they are identified by evaluation which is prohibited in view-only. Thus, to
+display these errors they need the same treatment as the rest of the view-only values, they need to be exported on save and then imported and attached upon loading the flow graph.
+
+So, the next step is to fix this as well as continuing to adjust things according to PR reviews.
+
+Finally, as it is the end of GSoC, I want to thank my mentors, Sebastian Koslowski and Marc Lichtman, for their support during the project. It has been great having them around in the chat and weekly meetings, and I've learnt a lot from them.
+
+I also want to thank everyone else that have showed interest in the project, the warm welcome and the appreciation for the project has been very encouraging to me.
+
+Finally I'll plug [the PR once more](https://github.com/gnuradio/gnuradio/pull/5004). Hope you all have a good weekend!.
+
+\-Oscar
+
+## Week 10 - Finishng touches
 This is the last week allotted for project work, with the next week being for submission and evaluation. This week has therefore consisted of making the final touches before submitting the PR. The PR will be submitted tomorrow as I want to do a little more work on the expression overview in the trust prompt. After the PR has gotten reviewed and I've adjusted the code accordingly I'll be done
 with GSoC'!
 
